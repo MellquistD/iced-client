@@ -1,18 +1,20 @@
 use iced::widget::{button, column};
 
-use crate::Command;
+use crate::AppEvent;
 
 use super::{workspace::WorkspacePage, Page};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
-pub struct ProjectPage;
+pub struct ProjectPage {
+    value: usize,
+}
 
 impl ProjectPage {
-    pub fn show(&self) -> iced::Element<Command> {
+    pub fn show(&self) -> iced::Element<AppEvent> {
         column![
             iced::widget::text("Project Page"),
             button("Switch to Workspace Page")
-                .on_press(Command::GoTo(Page::Workspace(WorkspacePage::default())))
+                .on_press(AppEvent::GoTo(Page::Workspace(WorkspacePage::default())))
         ]
         .into()
     }

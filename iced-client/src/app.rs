@@ -1,14 +1,16 @@
 use crate::{Page, SingleStrictSelectionList};
 
 #[derive(Debug, Clone)]
-pub enum Command {
+pub enum AppEvent {
     GoTo(Page),
 }
 
+/// Represents the holding og all apps state. This is the outer-most layer you have control over. title(), update(), view() will be directly put into application.run()
 pub struct App {
     pages: SingleStrictSelectionList<Page>,
 }
 
+// Picks Workspacepage as default page
 impl Default for App {
     fn default() -> Self {
         Self {
@@ -52,14 +54,14 @@ impl App {
         format!("{} - Iced", screen)
     }
     // Update values based on events
-    pub fn update(&mut self, event: Command) {
+    pub fn update(&mut self, event: AppEvent) {
         match event {
-            Command::GoTo(page) => self.select_active_page(&page),
+            AppEvent::GoTo(page) => self.select_active_page(&page),
         }
     }
     // Render the right page
-    pub fn view(&self) -> iced::Element<Command> {
-        match &self.get_active_page() {
+    pub fn view(&self) -> iced::Element<AppEvent> {
+        match self.get_active_page() {
             Page::Workspace(v) => v.show(),
             Page::Project(v) => v.show(),
         }
