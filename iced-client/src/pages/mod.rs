@@ -10,7 +10,7 @@ pub use workspace::*;
 use crate::AppEvent;
 
 pub trait Page {
-    fn title(&self) -> String;
+    fn title(&self) -> &str;
     fn show(&self) -> Element<AppEvent>;
 }
 

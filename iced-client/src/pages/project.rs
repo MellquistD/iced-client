@@ -6,14 +6,24 @@ use super::{workspace::WorkspacePage, Page};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ProjectEvent {}
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProjectPage {
+    title: String,
     value: usize,
 }
 
+impl Default for ProjectPage {
+    fn default() -> Self {
+        Self {
+            title: "Project".into(),
+            value: 0,
+        }
+    }
+}
+
 impl Page for ProjectPage {
-    fn title(&self) -> String {
-        "Project Page".into()
+    fn title(&self) -> &str {
+        self.title.as_str()
     }
     fn show(&self) -> iced::Element<AppEvent> {
         column![

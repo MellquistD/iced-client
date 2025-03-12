@@ -10,15 +10,26 @@ use crate::{AppEvent, ColorExt};
 
 use super::Page;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ComponentPage {
+    title: String,
     num: f32,
     checked: bool,
 }
 
+impl Default for ComponentPage {
+    fn default() -> Self {
+        Self {
+            title: "Component".into(),
+            num: 0.0,
+            checked: false,
+        }
+    }
+}
+
 impl Page for ComponentPage {
-    fn title(&self) -> String {
-        "Component Page".into()
+    fn title(&self) -> &str {
+        self.title.as_str()
     }
     fn show(&self) -> Element<AppEvent> {
         let column_style = Style::default()

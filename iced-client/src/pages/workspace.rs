@@ -7,15 +7,26 @@ use crate::{AppEvent, DrawingApp};
 
 use super::Page;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WorkspacePage {
+    title: String,
     value: usize,
 }
 
-impl Page for WorkspacePage {
-    fn title(&self) -> String {
-        "Workspace Page".into()
+impl Default for WorkspacePage {
+    fn default() -> Self {
+        Self {
+            title: "Workspace".into(),
+            value: 0,
+        }
     }
+}
+
+impl Page for WorkspacePage {
+    fn title(&self) -> &str {
+        self.title.as_str()
+    }
+
     fn show(&self) -> iced::Element<AppEvent> {
         column![
             iced::widget::text("Workspace Page"),
