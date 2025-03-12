@@ -12,6 +12,7 @@ use crate::AppEvent;
 pub trait Page {
     fn title(&self) -> &str;
     fn show(&self) -> Element<AppEvent>;
+    fn run_event(&mut self, page_event: AppEvent);
 }
 
 impl PartialEq for Box<dyn Page> {

@@ -1,14 +1,21 @@
+use super::Page;
+use crate::{AppEvent, ColorExt};
 use iced::{
-    advanced::widget,
     padding,
-    widget::{button, column, container::Style, row},
+    widget::{self, column, container::Style, row, Button, Container, Text},
     Border, Color, Element,
     Length::Fill,
 };
 
-use crate::{AppEvent, ColorExt};
-
-use super::Page;
+#[derive(Debug, Clone, PartialEq)]
+pub enum ComponentPageEvent {
+    PressButton,
+}
+impl From<ComponentPageEvent> for AppEvent {
+    fn from(value: ComponentPageEvent) -> Self {
+        AppEvent::Component(value)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ComponentPage {
@@ -27,41 +34,38 @@ impl Default for ComponentPage {
     }
 }
 
+// EVENTS
+impl ComponentPage {
+    fn run_pressbutton(&mut self) {
+        self.checked = !self.checked
+    }
+}
+
 impl Page for ComponentPage {
+    /*************  ✨ Codeium Command ⭐  *************/
+    /// Get the title of the Component page as a string
+    /******  63060f41-bb6a-4136-af7d-e1cad0276996  *******/
     fn title(&self) -> &str {
         self.title.as_str()
     }
+    fn run_event(&mut self, app_event: AppEvent) {
+        let AppEvent::Component(event) = app_event else {
+            return;
+        };
+        match event {
+            ComponentPageEvent::PressButton => self.run_pressbutton(),
+        };
+    }
     fn show(&self) -> Element<AppEvent> {
-        let column_style = Style::default()
-            .background(Color::TRANSPARENT)
-            .border(Border::default().color(Color::BLACK).width(1.0));
-
-        let padding = 4.0;
-
-        // Make grid of components
-        iced::widget::container(column![
-            // Row 1
+        column![
             row![
-                iced::widget::container(button("Button"))
-                    .padding(padding)
-                    .style(move |_| column_style),
-                //container(content),
-                //container(content),
-                //container(content),
-                //container(content),
+                Button::new("Switch to Project Page").on_press(AppEvent::GoTo("Project".into())),
+                Button::new("Switch to Workspace Page")
+                    .on_press(AppEvent::GoTo("Workspace".into())),
             ],
-            // Row 2
-            row![
-                //container(content),
-                //container(content),
-                //container(content),
-                //container(content),
-                //container(content),
-            ],
-        ])
-        .style(|t| Style::default().background(Color::YELLOW))
-        .width(Fill)
-        .height(Fill)
+            Text::new(self.checked),
+            Button::new("Press me").on_press(ComponentPageEvent::PressButton.into()),
+        ]
         .into()
     }
 }

@@ -1,11 +1,20 @@
+use super::Page;
+use crate::{AppEvent, DrawingApp};
 use iced::{
     advanced::widget,
-    widget::{button, canvas, checkbox, column, container, row, text},
+    widget::{button, canvas, checkbox, column, container, row, text, Button, Text},
 };
 
-use crate::{AppEvent, DrawingApp};
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorkspacePageEvent {
+    IncrementNum,
+}
 
-use super::Page;
+impl From<WorkspacePageEvent> for AppEvent {
+    fn from(value: WorkspacePageEvent) -> Self {
+        AppEvent::Workspace(value.clone())
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WorkspacePage {
@@ -22,17 +31,37 @@ impl Default for WorkspacePage {
     }
 }
 
+impl WorkspacePage {
+    fn run_increment(&mut self) {
+        self.value += 1
+    }
+}
+
 impl Page for WorkspacePage {
     fn title(&self) -> &str {
         self.title.as_str()
     }
 
+    fn run_event(&mut self, app_event: AppEvent) {
+        let AppEvent::Workspace(event) = app_event else {
+            return;
+        };
+
+        match event {
+            WorkspacePageEvent::IncrementNum => self.run_increment(),
+        }
+    }
+
     fn show(&self) -> iced::Element<AppEvent> {
         column![
-            iced::widget::text("Workspace Page"),
-            //button("Switch to Project Page")
-            //    .on_press(AppEvent::GoTo(Page::Project(ProjectPage::default()))),
-            canvas(DrawingApp::default()).width(100.0).height(100.0)
+            row![
+                button("Switch to Project Page").on_press(AppEvent::GoTo("Project".into())),
+                button("Switch to Component Page").on_press(AppEvent::GoTo("Component".into())),
+            ],
+            row![
+                Text::new(self.value),
+                Button::new("+").on_press(WorkspacePageEvent::IncrementNum.into())
+            ]
         ]
         .into()
     }

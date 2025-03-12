@@ -1,14 +1,24 @@
-use crate::{ComponentPage, Page, ProjectPage, SingleStrictSelectionList, WorkspacePage};
+use crate::{
+    ComponentPage, ComponentPageEvent, Page, ProjectPage, ProjectPageEvent,
+    SingleStrictSelectionList, WorkspacePage, WorkspacePageEvent,
+};
 
-type PagesList = SingleStrictSelectionList<Box<dyn Page>>;
+type PageList = SingleStrictSelectionList<Box<dyn Page>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AppEvent {
+    // Global Events
     GoTo(String),
+
+    // Pages Events
+    Workspace(WorkspacePageEvent),
+    Project(ProjectPageEvent),
+    Component(ComponentPageEvent),
 }
+
 /// Represents the holding og all apps state. This is the outer-most layer you have control over. title(), update(), view() will be directly put into application.run()
 pub struct App {
-    pages: PagesList,
+    pages: PageList,
 }
 
 // Picks Workspacepage as default page
@@ -30,21 +40,38 @@ impl Default for App {
 
 // GETTER / SETTERS
 impl App {
-    fn get_active_page(&self) -> &dyn Page {
-        self.pages.get_selected().as_ref()
+    fn get_active_page(&self) -> &Box<dyn Page> {
+        self.pages.get_selected()
     }
-
-    fn select_page(&mut self, index: usize) {
+    fn toggle_by_index(&mut self, index: usize) {
         self.pages.toggle_by_index(index);
     }
-    fn select_by_title(&mut self, title: String) {
+    fn toggle_by_title(&mut self, title: String) {
         let index = self
             .pages
             .iter()
             .position(|x| x.title() == title)
             .expect("Page not found");
 
-        self.select_page(index);
+        self.toggle_by_index(index);
+    }
+    fn get_page_by_title(&self, title: &str) -> &Box<dyn Page> {
+        let index = self
+            .pages
+            .iter()
+            .position(|x| x.title() == title)
+            .expect("Page not found");
+
+        self.pages.get(index)
+    }
+    fn get_mut_page_by_title(&mut self, title: &str) -> &mut Box<dyn Page> {
+        let index = self
+            .pages
+            .iter()
+            .position(|x| x.title() == title)
+            .expect("Page not found");
+
+        self.pages.get_mut(index)
     }
 }
 
@@ -55,9 +82,15 @@ impl App {
         self.get_active_page().title().into()
     }
     // Update values based on events
-    pub fn update(&mut self, event: AppEvent) {
-        match event {
-            AppEvent::GoTo(title) => self.select_by_title(title),
+    pub fn update(&mut self, app_event: AppEvent) {
+        match app_event {
+            AppEvent::GoTo(title) => self.toggle_by_title(title),
+            AppEvent::Workspace(_) => self
+                .get_mut_page_by_title("Workspace".into())
+                .run_event(app_event),
+            AppEvent::Component(_) => self
+                .get_mut_page_by_title("Component".into())
+                .run_event(app_event),
         }
     }
     // Render the right page
