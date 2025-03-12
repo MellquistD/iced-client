@@ -1,25 +1,28 @@
-use crate::{Page, SingleStrictSelectionList};
+use crate::{ComponentPage, Page, ProjectPage, SingleStrictSelectionList, WorkspacePage};
 
-#[derive(Debug, Clone)]
+type PagesList = SingleStrictSelectionList<Box<dyn Page>>;
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum AppEvent {
-    GoTo(Page),
+    GoTo(String),
 }
-
 /// Represents the holding og all apps state. This is the outer-most layer you have control over. title(), update(), view() will be directly put into application.run()
 pub struct App {
-    pages: SingleStrictSelectionList<Page>,
+    pages: PagesList,
 }
 
 // Picks Workspacepage as default page
 impl Default for App {
     fn default() -> Self {
         Self {
+            // Create selectable list of pages
             pages: SingleStrictSelectionList::new(
                 vec![
-                    Page::Workspace(crate::WorkspacePage::default()),
-                    Page::Project(crate::ProjectPage::default()),
+                    Box::new(WorkspacePage::default()),
+                    Box::new(ProjectPage::default()),
+                    Box::new(ComponentPage::default()),
                 ],
-                0,
+                2,
             ),
         }
     }
@@ -27,18 +30,21 @@ impl Default for App {
 
 // GETTER / SETTERS
 impl App {
-    fn get_active_page(&self) -> &Page {
-        &self.pages.get_selected()
+    fn get_active_page(&self) -> &dyn Page {
+        self.pages.get_selected().as_ref()
     }
 
-    fn select_active_page(&mut self, page: &Page) {
-        // First find the index without holding onto the borrow
-        let index = self.pages.iter().position(|p| p == page);
+    fn select_page(&mut self, index: usize) {
+        self.pages.toggle_by_index(index);
+    }
+    fn select_by_title(&mut self, title: String) {
+        let index = self
+            .pages
+            .iter()
+            .position(|x| x.title() == title)
+            .expect("Page not found");
 
-        // Now use the index (if found) with a fresh mutable borrow
-        if let Some(idx) = index {
-            self.pages.toggle_by_index(idx);
-        }
+        self.select_page(index);
     }
 }
 
@@ -46,24 +52,16 @@ impl App {
 impl App {
     // Get title of each page
     pub fn title(&self) -> String {
-        let screen = match self.get_active_page() {
-            Page::Workspace(_) => "Workspace",
-            Page::Project(_) => "Projects View",
-        };
-
-        format!("{} - Iced", screen)
+        self.get_active_page().title().into()
     }
     // Update values based on events
     pub fn update(&mut self, event: AppEvent) {
         match event {
-            AppEvent::GoTo(page) => self.select_active_page(&page),
+            AppEvent::GoTo(title) => self.select_by_title(title),
         }
     }
     // Render the right page
     pub fn view(&self) -> iced::Element<AppEvent> {
-        match self.get_active_page() {
-            Page::Workspace(v) => v.show(),
-            Page::Project(v) => v.show(),
-        }
+        self.get_active_page().show()
     }
 }

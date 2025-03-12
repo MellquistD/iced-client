@@ -1,17 +1,22 @@
+mod component;
 mod project;
 mod workspace;
 
-pub use project::ProjectPage;
-pub use workspace::WorkspacePage;
+pub use component::*;
+use iced::Element;
+pub use project::*;
+pub use workspace::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Page {
-    Project(ProjectPage),
-    Workspace(WorkspacePage),
+use crate::AppEvent;
+
+pub trait Page {
+    fn title(&self) -> String;
+    fn show(&self) -> Element<AppEvent>;
 }
 
-impl Default for Page {
-    fn default() -> Self {
-        Page::Project(ProjectPage::default())
+impl PartialEq for Box<dyn Page> {
+    fn eq(&self, other: &Self) -> bool {
+        // TODO: Make more robust with unique identifiers
+        self.title() == other.title()
     }
 }

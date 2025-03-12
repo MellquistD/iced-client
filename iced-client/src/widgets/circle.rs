@@ -1,13 +1,20 @@
 use iced::advanced::layout::{self, Layout, Limits, Node};
 use iced::advanced::renderer::{self, Style};
+use iced::advanced::widget::tree::State;
 use iced::advanced::widget::{self, Tree, Widget};
-use iced::border;
 use iced::mouse::{self, Cursor};
+use iced::widget::canvas;
+use iced::{border, Renderer, Theme};
 use iced::{Color, Element, Length, Rectangle, Size};
 
-#[derive(Default)]
 pub struct Circle {
     radius: f32,
+}
+
+impl Default for Circle {
+    fn default() -> Self {
+        Self { radius: 15.0 }
+    }
 }
 
 impl Circle {
@@ -59,6 +66,37 @@ where
     fn from(circle: Circle) -> Self {
         Self::new(circle)
     }
+}
+// Then, we implement the `Program` trait
+impl<Message> canvas::Program<Message> for Circle {
+    // No internal state
+    type State = ();
+
+    fn draw(
+        &self,
+        _state: &(),
+        renderer: &Renderer,
+        _theme: &Theme,
+        bounds: Rectangle,
+        _cursor: mouse::Cursor,
+    ) -> Vec<canvas::Geometry> {
+        // We prepare a new `Frame`
+        let mut frame = canvas::Frame::new(renderer, bounds.size());
+
+        // We create a `Path` representing a simple circle
+        let circle = canvas::Path::circle(frame.center(), self.radius);
+
+        // And fill it with some color
+        frame.fill(&circle, Color::WHITE);
+
+        // Then, we produce the geometry
+        vec![frame.into_geometry()]
+    }
+}
+
+// Finally, we simply use our `Circle` to create the `Canvas`!
+fn view<'a, Message: 'a>(_state: &'a State) -> iced::Element<'a, Message> {
+    canvas(Circle { radius: 50.0 }).into()
 }
 
 // Function for accessibility

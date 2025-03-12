@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-iced = { version = "0.13.1", features = ["advanced"] }
+rand = "0.9.0"
+chrono = { version = "*" }
+iced = { version = "0.13.1", features = ["advanced", "canvas"] }

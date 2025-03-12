@@ -3,7 +3,7 @@ pub struct SingleStrictSelectionList<T> {
     selected_index: usize,
 }
 
-impl<T> SingleStrictSelectionList<T> {
+impl<T: PartialEq> SingleStrictSelectionList<T> {
     /// Creates a new SingleStrictSelectionList with the given items and initially selected index.
     ///
     /// # Panics
@@ -25,6 +25,15 @@ impl<T> SingleStrictSelectionList<T> {
     pub fn toggle_by_index(&mut self, index: usize) {
         assert!(index < self.items.len(), "Index out of bounds");
         self.selected_index = index;
+    }
+
+    pub fn toggle(&mut self, item: &T) {
+        let idx = self
+            .items
+            .iter()
+            .position(|x| x == item)
+            .expect("Item not found in list");
+        self.toggle_by_index(idx);
     }
 
     /// Returns a reference to the currently selected item.
